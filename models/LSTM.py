@@ -51,7 +51,6 @@ class LSTM(nn.Module):
         self.input_size = input_size
         self.hidden_size = hidden_size
         self.cell = LSTMCell(input_size=self.input_size, hidden_size=self.hidden_size)
-        self.fc_final = nn.Linear(hidden_size, 1)
 
     def forward(self, x):
         batch_size, seq_size, _ = x.size()
@@ -60,7 +59,6 @@ class LSTM(nn.Module):
         for idx in range(seq_size):
             x_input = x[:, idx, :]
             output_gate, (hidden_gate, cell_gate) = self.cell(x_input, (hidden_gate, cell_gate))
-        output_gate = self.fc_final(output_gate)    
         return output_gate, (hidden_gate, cell_gate)
 
 if __name__ == "__main__":
