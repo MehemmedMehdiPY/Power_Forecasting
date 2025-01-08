@@ -54,8 +54,8 @@ class LSTM(nn.Module):
 
     def forward(self, x):
         batch_size, seq_size, _ = x.size()
-        hidden_gate = torch.zeros(batch_size, self.hidden_size)
-        cell_gate = torch.zeros(batch_size, self.hidden_size)
+        hidden_gate = torch.zeros(batch_size, self.hidden_size).to(x.device)
+        cell_gate = torch.zeros(batch_size, self.hidden_size).to(x.device)
         for idx in range(seq_size):
             x_input = x[:, idx, :]
             output_gate, (hidden_gate, cell_gate) = self.cell(x_input, (hidden_gate, cell_gate))
