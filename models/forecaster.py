@@ -1,4 +1,4 @@
-from LSTM import LSTM
+from .lstm import LSTM
 from torch import nn
 
 class Forecaster(nn.Module):
