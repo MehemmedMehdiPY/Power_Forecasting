@@ -8,7 +8,7 @@ from tqdm import tqdm
 class Trainer:
     def __init__(self, model: torch.nn.Module, train_loader, val_loader,
                  optimizer: torch.optim.Adam, loss_fn: torch.nn.modules.loss.MSELoss, 
-                 epochs: int, filepath: str, num_classes: int = 2, device: Optional[str] = None):
+                 epochs: int, filepath: str, device: Optional[str] = None):
         """The class to support training process
         Args:
             model:                    Model to train
@@ -18,7 +18,6 @@ class Trainer:
             loss_fn:                  Loss function
             epochs:                   The number of epochs for training
             filepath:                 Filepath to save the training model
-            num_classes:              The number of channels in the output
             device:                   Device to use trainer object
         """
 
@@ -33,7 +32,6 @@ class Trainer:
         
         self.epochs = epochs
         self.filepath = filepath
-        self.num_classes = num_classes
   
         self.device = (device if device is not None else 'cpu')
 

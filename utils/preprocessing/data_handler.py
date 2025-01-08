@@ -24,7 +24,7 @@ class DataHandler(Dataset):
         sample = torch.tensor(sample).to(torch.float32)
         sample = (sample - self.min_) / (self.max_ - self.min_)
         x = sample[:, :self.seq_length]
-        y = sample[:, [self.seq_length]]
+        y = sample[:, self.seq_length]
         return x, y
     
     def get_indexes(self):
