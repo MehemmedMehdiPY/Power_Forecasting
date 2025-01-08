@@ -15,7 +15,7 @@ from torch.nn import MSELoss
 
 loader = DataHandler("../data", seq_length=24, batch_size=BATCH_SIZE)
 
-model = Forecaster(input_size=INPUT_SIZE, hidden_size=HIDDEN_SIZE)
+model = Forecaster(input_size=INPUT_SIZE, hidden_size=HIDDEN_SIZE).to(DEVICE)
 
 optimizer = Adam(model.parameters(), lr=LEARNING_RATE)
 loss_fn = MSELoss()
