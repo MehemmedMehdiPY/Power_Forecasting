@@ -24,7 +24,10 @@ class DataHandler(Dataset):
             self.limit = 100
         elif mode == "val":
             self.get_sample = self.get_sample_direct
-            self.start_idx = - self.batch_size
+            
+            # creating object self.start_idx
+            self.set_start_idx()
+
             self.limit = (
                 (self.row_size // self.batch_size) + 
                 (self.batch_size - 1 + self.row_size % batch_size) // self.batch_size
@@ -59,9 +62,12 @@ class DataHandler(Dataset):
         sample = np.zeros((self.batch_size, self.seq_length + 1, self.column_size))
         for i, idx in enumerate(range(self.start_idx, self.start_idx + self.batch_size)):
             sample[i] = self.data[idx: idx + self.seq_length + 1]
-            
         return sample
     
+    def set_start_idx(self):
+        """Used when validation set should be (re)started for direct sampling"""
+        self.start_idx = - self.batch_size
+
     def scale(self, x):
         x = (x - self.min_) / (self.max_ - self.min_)
         return x

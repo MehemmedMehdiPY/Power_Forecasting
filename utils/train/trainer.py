@@ -6,7 +6,7 @@ from typing import Optional, Tuple
 from tqdm import tqdm
 
 class Trainer:
-    def __init__(self, model: torch.nn.Module, train_loader, val_loader,
+    def __init__(self, model: torch.nn.Module, train_handler, val_handler,
                  optimizer: torch.optim.Adam, loss_fn: torch.nn.modules.loss.MSELoss, 
                  epochs: int, filepath: str, device: Optional[str] = None):
         """The class to support training process
@@ -22,8 +22,8 @@ class Trainer:
         """
 
         self.model = model
-        self.train_loader = train_loader
-        self.val_loader = val_loader
+        self.train_handler = train_handler
+        self.val_handler = val_handler
         self.optimizer = optimizer
         self.loss_fn = loss_fn
 
@@ -50,12 +50,12 @@ class Trainer:
 
         self.model.train()
         train_loss = 0
-        with tqdm(range(self.train_len)) as loop:
+        with tqdm(range(self.train_handler.limit)) as loop:
             # Description of current epoch
             loop.set_description('Epoch {}/{}'.format(epoch + 1, self.epochs))
 
-            for _ in enumerate(loop):
-                X, Y = self.train_loader()
+            train_loader = self.train_handler()
+            for _, (X, Y) in zip(loop, train_loader):
                 X = X.to(self.device)
                 Y = Y.to(self.device)
 
@@ -81,12 +81,11 @@ class Trainer:
             Returns:
                   test_loss              float
         """
-
         self.model.eval()
         with torch.no_grad():
             test_loss = 0
-            for _ in range(self.val_len):
-                X, Y = self.val_loader()
+            val_loader = self.val_handler()
+            for X, Y in val_loader:
                 X = X.to(self.device)
                 Y = Y.to(self.device)
 
@@ -94,7 +93,7 @@ class Trainer:
 
                 loss = self.loss_fn(out, Y)
                 test_loss += loss.item()
-
+        self.val_handler.set_start_idx()
         test_loss = test_loss / self.val_len
         return test_loss
 
@@ -102,7 +101,8 @@ class Trainer:
         """The function to control training"""
         writer = SummaryWriter()
 
-        best_test_loss = 0
+        # Initalzing best_test_loss with as large value as possible
+        best_test_loss = 1024
         for epoch in range(epoch_start, self.epochs):
             print('-' * 50)
 
@@ -112,14 +112,13 @@ class Trainer:
             writer.add_scalar("Loss/Train", train_loss, epoch + 1)
             writer.add_scalar("Loss/Test", test_loss, epoch + 1)
 
-            if test_loss <= best_test_loss:
+            if test_loss < best_test_loss:
                 # Saving the best model
-                print('The best model is saved at {:.3f}'.format(best_test_loss))
+                print('The best model is saved at {:.3f}'.format(test_loss))
                 with open('best_result/best_result.txt', 'w') as fo:
-                    fo.write("f1: {}".format(best_test_loss))
+                    fo.write("test loss: {}".format(test_loss))
                 self.save_model()
-                best_test_loss = best_test_loss
-
+                best_test_loss = test_loss
         writer.close()
 
     def save_model(self, filepath=None):
