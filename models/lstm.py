@@ -14,6 +14,7 @@ class LSTMCell(nn.Module):
 
         self.W_ii = nn.Parameter(torch.Tensor(hidden_size, input_size))
         self.W_hi = nn.Parameter(torch.Tensor(hidden_size, hidden_size))
+        self.W_ci = nn.Parameter(torch.Tensor(hidden_size, hidden_size))
         self.b_i = nn.Parameter(torch.Tensor(hidden_size))
 
         self.W_if = nn.Parameter(torch.Tensor(hidden_size, input_size))
@@ -41,6 +42,7 @@ class LSTMCell(nn.Module):
         input_gate = f.sigmoid(
             torch.mm(x, self.W_ii.T) + 
             torch.mm(hidden_gate, self.W_hi.T) + 
+            torch.mm(cell_gate, self.W_ci.T) + 
             self.b_i
         )
         forget_gate = f.sigmoid(
@@ -70,7 +72,6 @@ class LSTMCell(nn.Module):
 class LSTM(nn.Module):
     def __init__(self, input_size, hidden_size):
         super().__init__()
-        
         self.input_size = input_size
         self.hidden_size = hidden_size
         self.cell = LSTMCell(input_size=self.input_size, hidden_size=self.hidden_size)
